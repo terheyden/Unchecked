@@ -2,20 +2,22 @@ package com.terheyden.unchecked;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * CheckedBiFunctionTest unit tests.
  */
-public class CheckedBiFunctionTest {
+class CheckedBiFunctionTest extends ExceptionTester {
 
     @Test
-    public void test() {
+    void test() {
 
-        ExceptionTester tester = new ExceptionTester();
-        CheckedBiFunction<String, String, String> function = tester::doSomethingChecked;
-        function.apply("foo", "bar");
+        // Accepts checked work.
+        CheckedBiFunction<String, String, String> function = CheckedBiFunction.of(this::returnChecked);
+        // Can be cast to a normal BiFunction.
+        CheckedBiFunction<String, String, String> biFunction = function;
 
-        assertEquals(1, tester.getCounter());
+        biFunction.apply("aaa", "bbb");
+        assertThat(getCounter()).isEqualTo(1);
     }
 }

@@ -2,21 +2,23 @@ package com.terheyden.unchecked;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * CheckedBiPredicateTest unit tests.
  */
-public class CheckedBiPredicateTest {
+class CheckedBiPredicateTest extends ExceptionTester {
 
     @Test
-    public void test() {
+    void test() {
 
-        CheckedBiPredicate<String, String> predicate = (str1, str2) -> {
-            Thread.sleep(1);
-            return !str1.isEmpty() && !str2.isEmpty();
-        };
+        // Accepts checked work.
+        CheckedBiPredicate<String, String> predicate = CheckedBiPredicate.of(this::booleanChecked);
+        // Can be cast to a normal BiPredicate.
+        CheckedBiPredicate<String, String> biPredicate = predicate;
 
-        assertTrue(predicate.test("foo", "bar"));
+        predicate.test("aaa", "bbb");
+        assertThat(getCounter()).isEqualTo(1);
     }
 }

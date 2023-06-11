@@ -1,22 +1,27 @@
 package com.terheyden.unchecked;
 
+import java.util.function.BiConsumer;
+
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * CheckedBiConsumerTest unit tests.
+ * Extends {@link BiConsumer} to allow throwing checked exceptions.
+ *   {@link BiConsumer#accept(Object, Object)}
+ *   {@link BiConsumer#andThen(BiConsumer)}
  */
-public class CheckedBiConsumerTest {
+class CheckedBiConsumerTest extends ExceptionTester {
 
     @Test
-    public void test() {
+    void test() {
 
-        ExceptionTester tester = new ExceptionTester();
-        CheckedBiConsumer<String, String> consumer = tester::doSomethingChecked;
-        consumer.accept("foo", "bar");
+        // Accepts checked work.
+        CheckedBiConsumer<String, String> consumer = CheckedBiConsumer.of(this::returnChecked);
+        // Can be cast to a normal BiConsumer.
+        BiConsumer<String, String> biConsumer = consumer;
 
-        assertEquals(1, tester.getCounter());
-
+        biConsumer.accept("aaa", "bbb");
+        assertThat(getCounter()).isEqualTo(1);
     }
 }

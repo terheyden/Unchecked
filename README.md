@@ -22,7 +22,7 @@ Each `Checked` interface does the following:
 * Offers a few extra goodies for doing conversions (see below)
 
 ### Handy checked exception utils
-You also get a few handy methods from the `Unchecked`
+You also get a few handy methods from the `CheckedUtils`
 static class:
 
 * `throwUnchecked(Throwable)` — throws a checked exception as unchecked
@@ -45,7 +45,7 @@ pool.execute(() -> {
 ```
 The Unchecked lib gives us a few ways to handle this:
 ```java
-pool.execute(CheckedRunnable.of(() -> { // Use: Unchecked.runUnchecked()
+pool.execute(CheckedRunnable.of(() -> { // Use: CheckedUtils.runUnchecked()
     Thread.sleep(100);            // Now this throws unchecked
     doStuff();
 }));

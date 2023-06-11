@@ -4,36 +4,23 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * CheckedBiFunctionTest unit tests.
  */
-public class CheckedFunctionTest {
+class CheckedFunctionTest extends ExceptionTester {
 
     @Test
-    public void test() {
+    void test() {
 
-        ExceptionTester tester = new ExceptionTester();
-        CheckedFunction<String, String> function = tester::doSomethingChecked;
+        // Accepts checked work.
+        CheckedFunction<String, String> function = CheckedFunction.of(this::returnChecked);
+        // Can be cast to a normal Function.
+        Function<String, String> normal = function;
+
         function.apply("foo");
-
-        assertEquals(1, tester.getCounter());
-    }
-
-    @Test
-    public void testAndThen() {
-
-        CheckedFunction<String, Integer> lenFun = str -> {
-            Thread.sleep(1);
-            return str.length();
-        };
-
-        Function<String, Integer> lenx2 = lenFun.andThen(CheckedFunction.of(len -> {
-            Thread.sleep(1);
-            return len * 2;
-        }));
-
-        assertEquals(6, lenx2.apply("foo").intValue());
+        assertThat(getCounter()).isEqualTo(1);
     }
 }

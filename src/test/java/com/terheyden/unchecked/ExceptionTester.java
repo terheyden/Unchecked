@@ -1,19 +1,31 @@
 package com.terheyden.unchecked;
 
 /**
- * ExceptionTester class.
+ * For testing exception stuff.
  */
-public class ExceptionTester {
+class ExceptionTester {
 
-    private int counter = 0;
+    private int counter;
 
-    public String doSomethingChecked(String... strs) throws InterruptedException {
+    protected String returnChecked(String... str) throws InterruptedException {
         Thread.sleep(1);
         counter++;
-        return String.format("Dear %s, I have been called %d times.", String.join(", ", strs), counter);
+        return str.length == 0 ? "" : str[0];
     }
 
-    public int getCounter() {
+    protected boolean booleanChecked(String... str) throws InterruptedException {
+        Thread.sleep(1);
+        counter++;
+        return true;
+    }
+
+    protected String throwChecked(String... str) throws InterruptedException {
+        Thread.sleep(1);
+        counter++;
+        throw new InterruptedException(str[0]);
+    }
+
+    protected int getCounter() {
         return counter;
     }
 }

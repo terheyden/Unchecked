@@ -1,21 +1,26 @@
 package com.terheyden.unchecked;
 
+import java.util.function.Consumer;
+
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * CheckedConsumerTest unit tests.
  */
-public class CheckedConsumerTest {
+class CheckedConsumerTest extends ExceptionTester {
 
     @Test
-    public void test() {
+    void test() {
 
-        ExceptionTester tester = new ExceptionTester();
-        CheckedConsumer<String> consumer = tester::doSomethingChecked;
-        consumer.accept("foo");
+        // Accepts checked work.
+        CheckedConsumer<String> consumer = CheckedConsumer.of(this::returnChecked);
+        // Can be cast to a normal Consumer.
+        Consumer<String> consumer2 = consumer;
 
-        assertEquals(1, tester.getCounter());
+        consumer.accept("aaa");
+        assertThat(getCounter()).isEqualTo(1);
     }
 }

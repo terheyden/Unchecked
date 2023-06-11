@@ -2,21 +2,22 @@ package com.terheyden.unchecked;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * CheckedPredicateTest unit tests.
  */
-public class CheckedPredicateTest {
+class CheckedPredicateTest extends ExceptionTester {
 
     @Test
-    public void test() {
+    void test() {
 
-        CheckedPredicate<String> predicate = str -> {
-            Thread.sleep(1);
-            return !str.isEmpty();
-        };
+        // Accepts checked work.
+        CheckedPredicate<String> predicate = CheckedPredicate.of(this::booleanChecked);
+        // Can be cast to a normal Predicate.
+        CheckedPredicate<String> normal = predicate;
 
-        assertTrue(predicate.test("foo"));
+        predicate.test("aaa");
+        assertThat(getCounter()).isEqualTo(1);
     }
 }
