@@ -1,5 +1,6 @@
 package com.terheyden.unchecked;
 
+import java.io.Serializable;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -12,7 +13,9 @@ import java.util.function.Function;
  * }</pre>
  */
 @FunctionalInterface
-public interface CheckedTriFunction<T, U, V, R> {
+public interface CheckedTriFunction<T, U, V, R> extends Serializable {
+
+    long serialVersionUID = 1L;
 
     /**
      * Static method to create a {@link CheckedTriFunction} from a lambda.

@@ -1,121 +1,111 @@
-# Unchecked
+# Unchecked library for Java
 
-_Java functional types — unchecked._
+_Java functional interfaces that accept checked exceptions._
 
 ## What is this lib?
-### Checked Functional Interfaces
+
+We've all been there.
+This is the code you wanted to write...
+
+```java
+// Read in a text file, print out each line.
+Stream.of(Paths.get("someFile.txt"))
+    .map(Path::toAbsolutePath)
+    .map(file -> Files.readAllLines(file)) // throws IOException!
+    .forEach(lines -> lines.forEach(System.out::println));
+```
+
+But because of that checked exception, you ended up with:
+
+```java
+// Read in a text file, print out each line.
+Stream.of(Paths.get("someFile.txt"))
+    .map(Path::toAbsolutePath)
+    .map(file -> {
+        try {
+            return Files.readAllLines(file);
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to read file: " + file, e);
+        }
+    })
+    .forEach(lines -> lines.forEach(System.out::println));
+```
+
+Use this lib! Be happy again:
+
+```java
+// Read in a text file, print out each line.
+Stream.of(Paths.get("someFile.txt"))
+    .map(Path::toAbsolutePath)
+    .map(CheckedFunction.of(Files::readAllLines)) // Unchecked, yay!
+    .forEach(lines -> lines.forEach(System.out::println));
+```
+
+There is also a `CheckedUtils.get()` method that provides a shortcut
+(shown here as a static import for maximum brevity):
+
+```java
+// Read in a text file, print out each line.
+Stream.of(Paths.get("someFile.txt"))
+    .map(Path::toAbsolutePath)
+    .map(file -> get(() -> Files.readAllLines(file))) // Unchecked again!
+    .forEach(lines -> lines.forEach(System.out::println));
+```
+
+## Checked Functional Interfaces
 Unchecked provides the following Functional Interfaces:
 
-* `CheckedConsumer`
-* `CheckedFunction`
-* `CheckedPredicate`
+* `CheckedConsumer`, `CheckedBiConsumer`, `CheckedTriConsumer`
+* `CheckedFunction`, `CheckedBiFunction`, `CheckedTriFunction`
+* `CheckedPredicate`, `CheckedBiPredicate`, `CheckedTriPredicate`
 * `CheckedRunnable`
 * `CheckedSupplier`
-* `CheckedBiConsumer`
-* `CheckedBiFunction`
-* `CheckedBiPredicate`
 
-Each `Checked` interface does the following:
-* Extends the corresponding Java functional interface
+### Notes
+
+- Each `Checked-` and `CheckedBi-` interface extends the corresponding Java functional interface
   (e.g. `CheckedConsumer` extends `Consumer`)
-* Handles code with checked exceptions (see examples below)
-* Offers a few extra goodies for doing conversions (see below)
+  - This means they can be used anywhere a Java functional interface is expected
+  - (There are no `Tri-` interfaces in Java so the `CheckedTri-` interfaces only extend `Serializable`.)
+- Support for partial application (currying) of `Bi-` and `Tri-` interfaces
+- Every interface is written independently, with no external dependencies
+  - If adding more dependencies to your project is difficult, please feel free to copy/paste what you need
 
-### Handy checked exception utils
+## What happens to the checked exceptions?
+They are simply recast as unchecked.
+They are not wrapped or modified in any way; you're getting the original exception.
+
+## Handy checked exception utils
 You also get a few handy methods from the `CheckedUtils`
 static class:
 
 * `throwUnchecked(Throwable)` — throws a checked exception as unchecked
 * `sleep(long)` — unchecked version of `Thread.sleep(long)`
-* `runUnchecked(...)` — wrap some code that throws a checked exception
-* `getUnchecked(...)` — wrap some code that throws and returns a value
+* `run(...)` — wrap some code that throws a checked exception
+* `get(...)` — wrap some code that throws and returns a value
 
-We'll see some examples of why these are so useful below.
+## Banning Checked Exceptions
 
-## How to use
-### Wrapping Java functions
+Use `CheckedUtils.throwUnchecked()` to recast checked exceptions as unchecked:
 
-Let's say we want to submit a `Runnable` to our threadpool,
-but it throws a checked exception:
-```java
-pool.execute(() -> {
-    Thread.sleep(100); // "Unhandled exception: InterruptedException"
-    doStuff();
-});
-```
-The Unchecked lib gives us a few ways to handle this:
-```java
-pool.execute(CheckedRunnable.of(() -> { // Use: CheckedUtils.runUnchecked()
-    Thread.sleep(100);            // Now this throws unchecked
-    doStuff();
-}));
-```
-Or:
-```java
-pool.execute(() -> {
-    runUnchecked(() -> Thread.sleep(100)); // Now this throws unchecked
-    doStuff();
-}));
-```
-
-### Using in your own methods
-When writing your own methods, you can use the `Checked` interfaces
-to make your lambda expressions cleaner:
-```java
-// If you create this method:
-public String calculateString(Supplier<String> supplier) {
-    return supplier.get();
-}
-
-// You could end up calling it like this:
-String urlStr = calculateString(() -> {
-    try {
-        URL url = new URL("http://www.terheyden.com"); // throws MalformedURLException
-        return url.toString();
-    } catch (Exception e) {
-        Unchecked.throwUnchecked(e);
-    }
-});
-```
-Versus:
-```java
-// Accept a CheckedSupplier instead:
-public String calculateString(CheckedSupplier<String> supplier) {
-    return supplier.get();
-}
-
-// Life gets much simpler:
-String urlStr = calculateString(() -> {
-    URL url = new URL("http://www.terheyden.com"); // throws unchecked
-    return url.toString();
-});
-```
-
-### Rethrowing your own checked exceptions
-Sometimes you don't want to use a lambda:
 ```java
 try {
-    // Do some stuff that throws a checked exception.
+    riskyOperation();
 } catch (Exception e) {
     Unchecked.throwUnchecked(e);
 }
 ```
+
 This works for code that returns a value too:
+
 ```java
 try {
-    riskyOperation();
-    return someValue;
+    return riskyCalculation();
 } catch (Exception e) {
-    return throwUnchecked(e); // static import version.
+    return throwUnchecked(e); // Method return requirement is satisfied.
 }
 ```
 
-## More information
-### What happens to the checked exceptions?
-They are simply thrown as unchecked.
-They do not get wrapped in a `RuntimeException` or anything else;
-they are preserved and thrown exactly as they are.
-
-### What are the requirements?
+## What are the requirements?
 * Java 1.8+
 

@@ -1,5 +1,6 @@
 package com.terheyden.unchecked;
 
+import java.io.Serializable;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
@@ -7,7 +8,9 @@ import java.util.function.Predicate;
  * Functional interface that accepts three arguments and returns a boolean.
  */
 @FunctionalInterface
-public interface CheckedTriPredicate<T, U, V> {
+public interface CheckedTriPredicate<T, U, V> extends Serializable {
+
+    long serialVersionUID = 1L;
 
     /**
      * Static method to create a {@link CheckedTriPredicate} from a lambda.

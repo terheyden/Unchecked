@@ -1,5 +1,6 @@
 package com.terheyden.unchecked;
 
+import java.io.Serializable;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -12,7 +13,9 @@ import java.util.function.Consumer;
  * }</pre>
  */
 @FunctionalInterface
-public interface CheckedTriConsumer<T, U, V> {
+public interface CheckedTriConsumer<T, U, V> extends Serializable {
+
+    long serialVersionUID = 1L;
 
     /**
      * Static method to create a {@link CheckedTriConsumer} from an expression.
